@@ -1,0 +1,41 @@
+# ===============================================
+# Customization
+# ===============================================
+ZSH_THEME="nyverune"
+export ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
+
+# ============== oh-my-zsh-plugins ==============
+plugins=(
+    git
+    sudo
+    archlinux
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+    fast-syntax-highlighting
+    copyfile
+    copybuffer
+    dirhistory
+)
+
+# Ensure custom theme is available for oh-my-zsh
+if [ -d "$ZSH" ] && [ ! -e "$ZSH_CUSTOM/themes/nyverune.zsh-theme" ]; then
+    mkdir -p "$ZSH_CUSTOM/themes"
+    ln -sf "$HOME/nyverune/dotfiles/zsh/.oh-my-zsh/custom/themes/nyverune.zsh-theme" "$ZSH_CUSTOM/themes/nyverune.zsh-theme" 2>/dev/null
+fi
+
+# Set-up oh-my-zsh (if installed)
+if [ -f "$ZSH/oh-my-zsh.sh" ]; then
+    source $ZSH/oh-my-zsh.sh
+fi
+
+
+# ===============================================
+# Set-up FZF key bindings
+# ===============================================
+source <(fzf --zsh)
+
+# zsh history
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory

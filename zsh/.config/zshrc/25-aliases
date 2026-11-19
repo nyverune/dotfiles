@@ -36,3 +36,10 @@ alias gcredential="git config credential.helper store"
 # System
 # ===============================================
 alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
+
+
+# ===============================================
+# Theming & Shell
+# ===============================================
+alias theme='nyverune-theme'
+alias bar='quickshell'

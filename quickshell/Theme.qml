@@ -40,15 +40,30 @@ QtObject {
     property color success: defaultSuccess
     property color info: defaultInfo
 
-    property var colorWatcher: FileView {
-        path: Quickshell.env("HOME") + "/.cache/wal/colors.json"
-        printErrors: false
-        onTextChanged: theme.reloadColors()
-        Component.onCompleted: theme.reloadColors()
+    property var colorProc: Process {
+        id: colorReader
+        command: ["cat", Quickshell.env("HOME") + "/.cache/wal/colors.json"]
+        stdout: StdioCollector {
+            onTextChanged: theme.parseColors(text)
+        }
     }
 
+    property var reloadTimer: Timer {
+        interval: 1000
+        repeat: true
+        running: true
+        onTriggered: theme.reloadColors()
+    }
+
+    Component.onCompleted: theme.reloadColors()
+
     function reloadColors() {
-        let raw = colorWatcher.text()
+        if (colorProc) {
+            colorProc.running = true
+        }
+    }
+
+    function parseColors(raw) {
         if (!raw || raw.trim().length === 0) return
 
         try {

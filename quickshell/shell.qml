@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Io
 import "./modules"
 
 ShellRoot {
@@ -87,5 +88,29 @@ ShellRoot {
                 }
             }
         }
+    }
+
+    // -------------------------------------------------------------
+    // On-Screen Display (OSD) for Volume, Mic & Brightness
+    // -------------------------------------------------------------
+    OSD {
+        id: osdWindow
+    }
+
+    // -------------------------------------------------------------
+    // IPC Handler for Live Dynamic Theme Reload
+    // -------------------------------------------------------------
+    IpcHandler {
+        target: "theme"
+        function reload() {
+            Theme.reloadColors()
+        }
+    }
+
+    // -------------------------------------------------------------
+    // Power & Session Menu (Shutdown, Reboot, Lock, Logout, Suspend)
+    // -------------------------------------------------------------
+    PowerMenu {
+        id: powerMenuWindow
     }
 }

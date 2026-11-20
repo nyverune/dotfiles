@@ -12,25 +12,13 @@ Pill {
 
     property int capacity: 100
     property string status: "Full"
+    property int acOnline: 0
     property bool isLow: capacity <= 20
-    property bool isCharging: status === "Charging"
+    property bool isCharging: status === "Charging" || (acOnline === 1 && status !== "Discharging")
     property bool notifiedLow: false
 
     color: isLow && !isCharging ? Qt.rgba(Theme.warning.r, Theme.warning.g, Theme.warning.b, 0.18) : Theme.surface
     border.color: isLow && !isCharging ? Theme.warning : Theme.border
-
-    // Read directly from sysfs (universal and zero daemon dependency)
-    FileView {
-        id: capFile
-        path: "/sys/class/power_supply/BAT0/capacity"
-        printErrors: false
-    }
-
-    FileView {
-        id: statFile
-        path: "/sys/class/power_supply/BAT0/status"
-        printErrors: false
-    }
 
     Process {
         id: notifyProc
@@ -43,14 +31,19 @@ Pill {
         ]
     }
 
-    function updateBattery() {
-        let rawCap = capFile.text().trim()
-        let rawStat = statFile.text().trim()
-        if (rawCap.length > 0) {
-            root.capacity = parseInt(rawCap) || 100
+    function parseOutput(raw) {
+        if (!raw || raw.length === 0) return
+        let lines = raw.trim().split("\n")
+        if (lines.length >= 1 && lines[0].length > 0) {
+            let cap = parseInt(lines[0])
+            if (!isNaN(cap)) root.capacity = cap
         }
-        if (rawStat.length > 0) {
-            root.status = rawStat
+        if (lines.length >= 2 && lines[1].length > 0) {
+            root.status = lines[1].trim()
+        }
+        if (lines.length >= 3 && lines[2].length > 0) {
+            let ac = parseInt(lines[2])
+            if (!isNaN(ac)) root.acOnline = ac
         }
 
         // Trigger low battery notification once when dropping to 20% or below while discharging
@@ -64,12 +57,39 @@ Pill {
         }
     }
 
+    // Direct kernel sysfs reader (bypasses inotify cache on virtual /sys files)
+    Process {
+        id: batProc
+        command: [
+            "sh", "-c",
+            "cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -n 1; " +
+            "cat /sys/class/power_supply/BAT*/status 2>/dev/null | head -n 1; " +
+            "cat /sys/class/power_supply/AD*/online /sys/class/power_supply/AC*/online 2>/dev/null | head -n 1"
+        ]
+        running: true
+        stdout: StdioCollector {
+            id: batOut
+            onTextChanged: root.parseOutput(text)
+        }
+        onExited: root.parseOutput(batOut.text)
+    }
+
+    // Ultra-responsive 1-second refresh timer
     Timer {
-        interval: 3000
+        id: pollTimer
+        interval: 1000
         running: true
         repeat: true
-        onTriggered: root.updateBattery()
-        Component.onCompleted: root.updateBattery()
+        onTriggered: {
+            if (!batProc.running) {
+                batProc.running = true
+            }
+        }
+        Component.onCompleted: {
+            if (!batProc.running) {
+                batProc.running = true
+            }
+        }
     }
 
     readonly property string batteryIcon: {

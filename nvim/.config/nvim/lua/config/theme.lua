@@ -137,6 +137,12 @@ function M.apply()
     set(0, "BufferLineIndicatorSelected", { fg = c.c5, bg = c.bg })
     set(0, "BufferLineSeparator", { fg = c.c0, bg = c.c0 })
     set(0, "BufferLineSeparatorSelected", { fg = c.c0, bg = c.bg })
+
+    -- Alpha Dashboard
+    set(0, "AlphaHeader", { fg = c.c5, bold = true })
+    set(0, "AlphaButton", { fg = c.fg })
+    set(0, "AlphaButtonShortcut", { fg = c.c3, bold = true })
+    set(0, "AlphaFooter", { fg = c.c8, italic = true })
 end
 
 M.apply()

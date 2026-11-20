@@ -185,8 +185,227 @@ def export_zsh_colors(mode: str, colors: dict):
         f'_NY_BORDER="%F{{{bor}}}"',
     ]
 
+    content = "\n".join(zsh_lines) + "\n"
     with open(CACHE_DIR / "colors.zsh", "w") as f:
-        f.write("\n".join(zsh_lines) + "\n")
+        f.write(content)
+    ny_dir = Path.home() / ".cache" / "nyverune"
+    ny_dir.mkdir(parents=True, exist_ok=True)
+    with open(ny_dir / "colors.zsh", "w") as f:
+        f.write(content)
+
+# ------------------------------------------------------------------------------
+# 4. Export Hyprland & Hyprlock Colors from Pywal Cache
+# ------------------------------------------------------------------------------
+def export_hypr_colors(mode: str, colors: dict, image_path: str = None):
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    special = colors.get("special", {})
+    palette = colors.get("colors", {})
+
+    pri = palette.get("color5", "#A855F7").replace("#", "")
+    sec = palette.get("color13", palette.get("color6", "#FF5CB8")).replace("#", "")
+    acc = palette.get("color6", palette.get("color14", "#C084FC")).replace("#", "")
+    mut = palette.get("color8", "#8B8297").replace("#", "")
+    inf = palette.get("color4", palette.get("color12", "#72B7FF")).replace("#", "")
+    suc = palette.get("color2", palette.get("color10", "#75D6A3")).replace("#", "")
+    war = palette.get("color3", palette.get("color11", "#FFC36B")).replace("#", "")
+    err = palette.get("color1", palette.get("color9", "#FF5C72")).replace("#", "")
+    fg = special.get("foreground", "#F6F0FC").replace("#", "")
+    bg = special.get("background", "#100D16").replace("#", "")
+    bor = palette.get("color8", "#2E2242").replace("#", "")
+
+    wall_path = str(Path(image_path).expanduser().resolve()) if image_path else str(Path.home() / ".config/hypr/assets/current_wallpaper.jpg")
+
+    hypr_lines = [
+        f"# Dynamic Pywal Hypr Colors ({mode})",
+        f"$wallpaper = {wall_path}",
+        f"$background = rgb({bg})",
+        f"$foreground = rgb({fg})",
+        f"$primary = rgb({pri})",
+        f"$secondary = rgb({sec})",
+        f"$accent = rgb({acc})",
+        f"$muted = rgb({mut})",
+        f"$info = rgb({inf})",
+        f"$success = rgb({suc})",
+        f"$warning = rgb({war})",
+        f"$error = rgb({err})",
+        f"$border = rgb({bor})",
+    ]
+
+    with open(CACHE_DIR / "colors-hyprland.conf", "w") as f:
+        f.write("\n".join(hypr_lines) + "\n")
+
+# ------------------------------------------------------------------------------
+# 5. Export Rofi Colors from Pywal Cache
+# ------------------------------------------------------------------------------
+def export_rofi_colors(mode: str, colors: dict):
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    special = colors.get("special", {})
+    palette = colors.get("colors", {})
+
+    pri = palette.get("color5", palette.get("color13", "#A855F7"))
+    fg = special.get("foreground", "#F6F0FC")
+    bg = special.get("background", "#100D16")
+    bg_alt = palette.get("color0", "#181224")
+    border = palette.get("color8", "#2E2242")
+    muted = palette.get("color8", "#8B8297")
+    urgent = palette.get("color1", "#FF5C72")
+    active = palette.get("color2", "#75D6A3")
+
+    rofi_lines = [
+        f"/* Dynamic Pywal Rofi Colors ({mode}) */",
+        "* {",
+        f"    wal-bg:            {bg}f2;",
+        f"    wal-bg-alt:        {bg_alt};",
+        f"    wal-fg:            {fg};",
+        f"    wal-primary:       {pri};",
+        f"    wal-border:        {border};",
+        f"    wal-muted:         {muted};",
+        f"    wal-urgent:        {urgent};",
+        f"    wal-active:        {active};",
+        "}",
+    ]
+    with open(CACHE_DIR / "colors-rofi.rasi", "w") as f:
+        f.write("\n".join(rofi_lines) + "\n")
+
+# ------------------------------------------------------------------------------
+# 6. Export Mako Colors from Pywal Cache
+# ------------------------------------------------------------------------------
+def export_mako_colors(mode: str, colors: dict):
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    special = colors.get("special", {})
+    palette = colors.get("colors", {})
+
+    pri = palette.get("color5", palette.get("color13", "#A855F7"))
+    fg = special.get("foreground", "#F6F0FC")
+    bg = special.get("background", "#100D16")
+    bg_alt = palette.get("color0", "#181224")
+    border = palette.get("color8", "#2E2242")
+    urgent = palette.get("color1", "#FF5C72")
+
+    mako_lines = [
+        f"# Dynamic Pywal Mako Colors ({mode})",
+        f"background-color={bg}fa",
+        f"text-color={fg}",
+        f"border-color={pri}",
+        f"progress-color=over {pri}",
+        "",
+        "[urgency=low]",
+        f"background-color={bg}fa",
+        f"text-color={fg}",
+        f"border-color={border}",
+        f"default-timeout=3000",
+        "",
+        "[urgency=normal]",
+        f"background-color={bg}fa",
+        f"text-color={fg}",
+        f"border-color={pri}",
+        f"default-timeout=5000",
+        "",
+        "[urgency=critical]",
+        f"background-color={bg_alt}fa",
+        f"text-color={fg}",
+        f"border-color={urgent}",
+        f"default-timeout=0",
+    ]
+    with open(CACHE_DIR / "colors-mako", "w") as f:
+        f.write("\n".join(mako_lines) + "\n")
+
+# ------------------------------------------------------------------------------
+# 7. Live App Reload Helpers (Kitty, Quickshell, Mako, Greeter, Assets)
+# ------------------------------------------------------------------------------
+def get_user_env():
+    env = dict(os.environ)
+    uid = os.getuid()
+    if "XDG_RUNTIME_DIR" not in env:
+        env["XDG_RUNTIME_DIR"] = f"/run/user/{uid}"
+    if "DBUS_SESSION_BUS_ADDRESS" not in env:
+        env["DBUS_SESSION_BUS_ADDRESS"] = f"unix:path={env['XDG_RUNTIME_DIR']}/bus"
+    if "WAYLAND_DISPLAY" not in env:
+        for name in ("wayland-1", "wayland-0"):
+            if (Path(env["XDG_RUNTIME_DIR"]) / name).exists():
+                env["WAYLAND_DISPLAY"] = name
+                break
+    return env
+
+def reload_kitty():
+    try:
+        subprocess.run(["killall", "-USR1", "kitty"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
+
+def reload_quickshell():
+    try:
+        env = get_user_env()
+        subprocess.run(["quickshell", "ipc", "call", "theme", "reload"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
+
+def reload_mako():
+    try:
+        env = get_user_env()
+        res = subprocess.run(["pgrep", "-x", "mako"], stdout=subprocess.DEVNULL)
+        if res.returncode == 0:
+            subprocess.run(["makoctl", "reload"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
+            subprocess.Popen(["mako"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    except Exception:
+        pass
+
+def sync_assets_and_greeter(target_image, colors_data):
+    if not target_image:
+        return
+    img_path = Path(target_image).expanduser().resolve()
+    if not img_path.is_file():
+        return
+
+    # 1. Update hyprlock current wallpaper
+    hypr_current = Path.home() / ".config" / "hypr" / "assets" / "current_wallpaper.jpg"
+    try:
+        hypr_current.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(img_path, hypr_current)
+    except Exception:
+        pass
+
+    # 2. Update dms greeter wallpaper & colors
+    dms_dir = Path.home() / ".config" / "dms"
+    dms_cache_dir = Path.home() / ".cache" / "dms"
+    try:
+        dms_dir.mkdir(parents=True, exist_ok=True)
+        dms_cache_dir.mkdir(parents=True, exist_ok=True)
+        dms_wall = dms_dir / "wallpaper.jpg"
+        shutil.copy2(img_path, dms_wall)
+        os.chmod(dms_wall, 0o644)
+    except Exception:
+        pass
+
+    # Update dms-colors.json
+    try:
+        special = colors_data.get("special", {})
+        palette = colors_data.get("colors", {})
+        pri = palette.get("color5", "#A855F7")
+        sec = palette.get("color13", palette.get("color6", "#FF5CB8"))
+        bg = special.get("background", "#100D16")
+        fg = special.get("foreground", "#F6F0FC")
+        dms_colors = {
+            "theme": "pywal",
+            "colors": {
+                "dark": {
+                    "primary": pri,
+                    "on_primary": "#FFFFFF",
+                    "primary_container": palette.get("color0", "#181224"),
+                    "secondary": sec,
+                    "surface": bg,
+                    "on_background": fg,
+                    "background": bg,
+                    "outline": palette.get("color8", "#2E2242")
+                }
+            }
+        }
+        with open(dms_cache_dir / "dms-colors.json", "w") as f:
+            json.dump(dms_colors, f, indent=2)
+        os.chmod(dms_cache_dir / "dms-colors.json", 0o644)
+    except Exception:
+        pass
 
 # ------------------------------------------------------------------------------
 # 4. Core Theming Engine (Invoking Pywal)
@@ -242,9 +461,23 @@ def apply_theme(mode: str = None, image_path: str = None, force_nyverune: bool =
         except Exception:
             pass
 
-    # Apply to GTK and Zsh
+    # Apply to GTK, Zsh, Hyprland, Rofi, Mako, Kitty, Quickshell, Hyprlock and DMS Greeter
     apply_gtk_theme(target_mode, colors_data)
     export_zsh_colors(target_mode, colors_data)
+    export_hypr_colors(target_mode, colors_data, target_image)
+    export_rofi_colors(target_mode, colors_data)
+    export_mako_colors(target_mode, colors_data)
+    sync_assets_and_greeter(target_image, colors_data)
+    reload_kitty()
+    reload_quickshell()
+    reload_mako()
+
+    # Reload Hyprland if running
+    try:
+        env = get_user_env()
+        subprocess.run(["hyprctl", "reload"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
 
     # Save state
     new_state = {

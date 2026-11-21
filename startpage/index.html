@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Nyverune</title>
+  <link rel="stylesheet" href="./colors.css">
+  <style>
+    :root {
+      --bg: var(--background, #0F0512);
+      --fg: var(--foreground, #cfb8b6);
+      --cursor: var(--cursor, #cfb8b6);
+      --c0: var(--color0, #0F0512);
+      --c1: var(--color1, #6C1B29);
+      --c2: var(--color2, #73232B);
+      --c3: var(--color3, #553E4D);
+      --c4: var(--color4, #8B1C2B);
+      --c5: var(--color5, #90252B);
+      --c6: var(--color6, #A55450);
+      --c7: var(--color7, #cfb8b6);
+      --c8: var(--color8, #90807f);
+      --c13: var(--color13, #90252B);
+      --c14: var(--color14, #A55450);
+      
+      --accent: var(--c6);
+      --accent-dim: var(--c4);
+      --card-bg: rgba(18, 10, 22, 0.68);
+      --card-border: rgba(207, 184, 182, 0.12);
+      --card-hover-border: var(--c6);
+      --card-hover-bg: rgba(28, 14, 32, 0.82);
+      --input-bg: rgba(15, 5, 18, 0.75);
+      --font-main: "JetBrainsMono Nerd Font", "JetBrains Mono", system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+      overflow-x: hidden;
+      padding: 2.5rem 1.5rem 3rem;
+    }
+
+    /* Ambient Wallpaper Layer */
+    .bg-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: var(--wallpaper, none);
+      background-size: cover;
+      background-position: center;
+      filter: blur(28px) brightness(0.28) saturate(1.2);
+      transform: scale(1.08);
+      z-index: -2;
+      transition: opacity 0.5s ease;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 30%, rgba(144, 37, 43, 0.12) 0%, rgba(15, 5, 18, 0.85) 75%, var(--bg) 100%);
+      z-index: -1;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.2rem;
+      z-index: 1;
+    }
+
+    /* Header Bar */
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 0.5rem;
+    }
+
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--fg);
+      background: var(--card-bg);
+      padding: 0.45rem 0.95rem;
+      border-radius: 9999px;
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10B981;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #10B981;
+      animation: pulse 2.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .utc-badge {
+      font-size: 0.85rem;
+      color: var(--c8);
+      background: var(--card-bg);
+      padding: 0.45rem 0.9rem;
+      border-radius: 9999px;
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      letter-spacing: 0.04em;
+    }
+
+    .utc-badge span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Hero & Clock Section */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .greeting {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--c8);
+      letter-spacing: 0.03em;
+    }
+
+    .greeting span {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .clock {
+      font-size: 4.8rem;
+      font-weight: 800;
+      line-height: 1;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+      text-shadow: 0 4px 30px rgba(165, 84, 80, 0.35);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s ease;
+    }
+
+    .clock:hover {
+      transform: scale(1.02);
+    }
+
+    .date-str {
+      font-size: 1rem;
+      color: var(--c8);
+      text-transform: capitalize;
+      letter-spacing: 0.04em;
+    }
+
+    /* Search Box */
+    .search-section {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1.25rem;
+      width: 20px;
+      height: 20px;
+      color: var(--c8);
+      pointer-events: none;
+      transition: color 0.2s ease;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1.05rem 3.5rem 1.05rem 3.2rem;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 1.05rem;
+      color: #FFFFFF;
+      outline: none;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .search-input::placeholder {
+      color: rgba(207, 184, 182, 0.45);
+      font-size: 0.95rem;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 25px rgba(165, 84, 80, 0.38), 0 8px 32px rgba(0, 0, 0, 0.4);
+      background: rgba(22, 10, 26, 0.9);
+    }
+
+    .search-input:focus + .search-icon {
+      color: var(--accent);
+    }
+
+    .kbd-shortcut {
+      position: absolute;
+      right: 1.25rem;
+      font-size: 0.75rem;
+      color: var(--c8);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      pointer-events: none;
+    }
+
+    /* Engine Selector Pills */
+    .engine-pills {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--c8);
+      font-size: 0.8rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .pill:hover {
+      color: var(--fg);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .pill.active {
+      background: var(--c5);
+      border-color: var(--accent);
+      color: #FFFFFF;
+      box-shadow: 0 2px 10px rgba(144, 37, 43, 0.4);
+    }
+
+    .pill-key {
+      opacity: 0.65;
+      font-size: 0.75rem;
+    }
+
+    /* Cards Grid */
+    .grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.4rem;
+      margin-top: 0.5rem;
+    }
+
+    .category-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.35rem 1.4rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .category-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--card-hover-border);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 20px rgba(165, 84, 80, 0.18);
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(207, 184, 182, 0.1);
+    }
+
+    .category-header svg {
+      width: 22px;
+      height: 22px;
+      color: var(--accent);
+    }
+
+    .links-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      padding: 0.6rem 0.85rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      color: var(--fg);
+    }
+
+    .link-item:hover {
+      background: var(--card-hover-bg);
+      border-color: rgba(165, 84, 80, 0.35);
+      color: #FFFFFF;
+      transform: translateX(4px);
+    }
+
+    .link-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .link-info svg {
+      width: 18px;
+      height: 18px;
+      color: var(--c8);
+      transition: color 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .link-item:hover .link-info svg {
+      color: var(--accent);
+    }
+
+    .link-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .link-desc {
+      font-size: 0.75rem;
+      color: var(--c8);
+      margin-left: 0.4rem;
+      opacity: 0.8;
+    }
+
+    .link-arrow {
+      width: 14px;
+      height: 14px;
+      color: var(--c8);
+      opacity: 0;
+      transform: translateX(-5px);
+      transition: all 0.2s ease;
+    }
+
+    .link-item:hover .link-arrow {
+      opacity: 1;
+      transform: translateX(0);
+      color: var(--accent);
+    }
+
+    /* Footer Info */
+    footer {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--c8);
+    }
+
+    .footer-btn {
+      background: none;
+      border: none;
+      color: var(--c8);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      transition: color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .footer-btn:hover {
+      color: var(--fg);
+    }
+
+    @media (max-width: 768px) {
+      .clock {
+        font-size: 3.5rem;
+      }
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      header {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-layer" id="bgLayer"></div>
+  <div class="bg-overlay"></div>
+
+  <div class="container">
+    <!-- Top Header -->
+    <header>
+      <div class="brand-badge">
+        <div class="status-dot"></div>
+        <span>Nyverune</span>
+      </div>
+      <div class="utc-badge" id="utcBadge">
+        UTC: <span id="utcTime">--:--</span>
+      </div>
+    </header>
+
+    <!-- Hero / Clock -->
+    <section class="hero">
+      <div class="greeting" id="greeting">Welcome back, <span>Nyverune</span></div>
+      <div class="clock" id="clock" title="Click to toggle 12h/24h format">00:00:00</div>
+      <div class="date-str" id="dateStr">Loading...</div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section">
+      <form id="searchForm" class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="Search or type !r, !c, !gh, !w, !g... (/ to focus)" 
+          autocomplete="off" 
+          autofocus
+        />
+        <span class="kbd-shortcut">/</span>
+      </form>
+
+      <!-- Engine Selector Pills -->
+      <div class="engine-pills">
+        <div class="pill active" data-engine="duckduckgo" data-prefix="!ddg">
+          <span>DuckDuckGo</span>
+          <span class="pill-key">!ddg</span>
+        </div>
+        <div class="pill" data-engine="rust" data-prefix="!r">
+          <span>Rust Docs</span>
+          <span class="pill-key">!r</span>
+        </div>
+        <div class="pill" data-engine="crates" data-prefix="!c">
+          <span>Crates.io</span>
+          <span class="pill-key">!c</span>
+        </div>
+        <div class="pill" data-engine="github" data-prefix="!gh">
+          <span>GitHub</span>
+          <span class="pill-key">!gh</span>
+        </div>
+        <div class="pill" data-engine="archwiki" data-prefix="!w">
+          <span>ArchWiki</span>
+          <span class="pill-key">!w</span>
+        </div>
+        <div class="pill" data-engine="google" data-prefix="!g">
+          <span>Google</span>
+          <span class="pill-key">!g</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cards Grid -->
+    <main class="grid">
+      
+      <!-- 1. Rust Ecosystem -->
+      <div class="category-card">
+        <div class="category-header">
+          <!-- Rust Gear Icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Rust Ecosystem</span>
+        </div>
+        <div class="links-list">
+          <a class="link-item" href="https://doc.rust-lang.org/book/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              <div>
+                <span class="link-title">The Rust Book</span>
+                <span class="link-desc">Official</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://doc.rust-lang.org/std/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <div>
+                <span class="link-title">Standard Library</span>
+                <span class="link-desc">std</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://docs.rs/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+              <div>
+                <span class="link-title">Docs.rs</span>
+                <span class="link-desc">Crates docs</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://crates.io/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+              <div>
+                <span class="link-title">Crates.io</span>
+                <span class="link-desc">Packages</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://play.rust-lang.org/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <div>
+                <span class="link-title">Rust Playground</span>
+                <span class="link-desc">Online runner</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://doc.rust-lang.org/rust-by-example/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+              <div>
+                <span class="link-title">Rust by Example</span>
+                <span class="link-desc">Guides</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. GitHub & Dev -->
+      <div class="category-card">
+        <div class="category-header">
+          <!-- GitHub Octocat Icon -->
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path>
+          </svg>
+          <span>GitHub & Code</span>
+        </div>
+        <div class="links-list">
+          <a class="link-item" href="https://github.com/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+              <div>
+                <span class="link-title">Dashboard</span>
+                <span class="link-desc">Feed</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://github.com/nyverune?tab=repositories" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              <div>
+                <span class="link-title">My Repos</span>
+                <span class="link-desc">nyverune</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://github.com/pulls" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><line x1="6" y1="9" x2="6" y2="21"></line></svg>
+              <div>
+                <span class="link-title">Pull Requests</span>
+                <span class="link-desc">Review</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://github.com/issues" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <div>
+                <span class="link-title">Issues</span>
+                <span class="link-desc">Assigned</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://github.com/trending" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+              <div>
+                <span class="link-title">Trending</span>
+                <span class="link-desc">Popular</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://gist.github.com/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+              <div>
+                <span class="link-title">GitHub Gists</span>
+                <span class="link-desc">Snippets</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- 3. System & Tools -->
+      <div class="category-card">
+        <div class="category-header">
+          <!-- Terminal / Arch Icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          <span>Arch & System</span>
+        </div>
+        <div class="links-list">
+          <a class="link-item" href="https://wiki.archlinux.org/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              <div>
+                <span class="link-title">ArchWiki</span>
+                <span class="link-desc">Docs</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://aur.archlinux.org/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+              <div>
+                <span class="link-title">AUR Packages</span>
+                <span class="link-desc">yay repo</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://wiki.hyprland.org/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+              <div>
+                <span class="link-title">Hyprland Wiki</span>
+                <span class="link-desc">Compositor</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://stackoverflow.com/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg>
+              <div>
+                <span class="link-title">Stack Overflow</span>
+                <span class="link-desc">Solutions</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://neovim.io/doc/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              <div>
+                <span class="link-title">Neovim Docs</span>
+                <span class="link-desc">Lua API</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://reddit.com/r/unixporn" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+              <div>
+                <span class="link-title">r/unixporn</span>
+                <span class="link-desc">Ricing</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- 4. AI & Cloud -->
+      <div class="category-card">
+        <div class="category-header">
+          <!-- Sparkles / AI Icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+          </svg>
+          <span>AI & Web Apps</span>
+        </div>
+        <div class="links-list">
+          <a class="link-item" href="https://gemini.google.com/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <div>
+                <span class="link-title">Google Gemini</span>
+                <span class="link-desc">Assistant</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://chatgpt.com/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <div>
+                <span class="link-title">ChatGPT</span>
+                <span class="link-desc">OpenAI</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://claude.ai/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+              <div>
+                <span class="link-title">Claude</span>
+                <span class="link-desc">Anthropic</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://youtube.com/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+              <div>
+                <span class="link-title">YouTube</span>
+                <span class="link-desc">Media</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://discord.com/app" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6h0a14.5 14.5 0 0 0-4-1.25 10.3 10.3 0 0 0-.5 1.05 13.9 13.9 0 0 0-3 0 10.3 10.3 0 0 0-.5-1.05A14.5 14.5 0 0 0 6 6a15.7 15.7 0 0 0-2 8.75 14.9 14.9 0 0 0 4.5 2.25 11.2 11.2 0 0 0 1-1.6 9.6 9.6 0 0 1-1.6-.75c.15-.1.3-.2.4-.3a10.6 10.6 0 0 0 9.4 0c.15.1.3.2.4.3a9.6 9.6 0 0 1-1.6.75 11.2 11.2 0 0 0 1 1.6 14.9 14.9 0 0 0 4.5-2.25A15.7 15.7 0 0 0 18 6z"></path><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle></svg>
+              <div>
+                <span class="link-title">Discord</span>
+                <span class="link-desc">App</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a class="link-item" href="https://reddit.com/" target="_self">
+            <div class="link-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M17 12a2 2 0 1 0-4 0v1a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-1a2 2 0 1 0-2 2 4 4 0 0 0 4 4h4a4 4 0 0 0 4-4 2 2 0 0 0-2-2z"></path></svg>
+              <div>
+                <span class="link-title">Reddit</span>
+                <span class="link-desc">Communities</span>
+              </div>
+            </div>
+            <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer Controls -->
+    <footer>
+      <span>Zen Browser Startpage</span>
+      <span>•</span>
+      <button class="footer-btn" id="toggleTimeFormat">Format: <span id="timeFormatLabel">24h</span></button>
+      <span>•</span>
+      <button class="footer-btn" id="toggleWallpaper">Wallpaper: <span id="wallpaperLabel">Active</span></button>
+    </footer>
+  </div>
+
+  <script>
+    // --- Clock & Dates ---
+    let is24Hour = localStorage.getItem('nyverune_clock_24h') !== 'false';
+    let showWallpaper = localStorage.getItem('nyverune_show_wallpaper') !== 'false';
+
+    const clockEl = document.getElementById('clock');
+    const dateEl = document.getElementById('dateStr');
+    const greetingEl = document.getElementById('greeting');
+    const utcTimeEl = document.getElementById('utcTime');
+    const timeFormatLabel = document.getElementById('timeFormatLabel');
+    const wallpaperLabel = document.getElementById('wallpaperLabel');
+    const bgLayer = document.getElementById('bgLayer');
+
+    function updateClock() {
+      const now = new Date();
+
+      // Greeting
+      const hour = now.getHours();
+      let greetText = "Good evening";
+      if (hour >= 5 && hour < 12) greetText = "Good morning";
+      else if (hour >= 12 && hour < 19) greetText = "Good afternoon";
+      greetingEl.innerHTML = `${greetText}, <span>Nyverune</span>`;
+
+      // Local Clock
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      let ampm = '';
+
+      if (!is24Hour) {
+        ampm = hours >= 12 ? ' PM' : ' AM';
+        hours = hours % 12 || 12;
+      }
+      const hourStr = String(hours).padStart(2, '0');
+      clockEl.textContent = `${hourStr}:${minutes}:${seconds}${ampm}`;
+
+      // UTC Clock
+      const utcHours = String(now.getUTCHours()).padStart(2, '0');
+      const utcMins = String(now.getUTCMinutes()).padStart(2, '0');
+      utcTimeEl.textContent = `${utcHours}:${utcMins} UTC`;
+
+      // Date Format
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      dateEl.textContent = now.toLocaleDateString('en-US', options);
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Clock Format Toggle
+    function setClockFormat(is24) {
+      is24Hour = is24;
+      localStorage.setItem('nyverune_clock_24h', is24Hour);
+      timeFormatLabel.textContent = is24Hour ? '24h' : '12h';
+      updateClock();
+    }
+    clockEl.addEventListener('click', () => setClockFormat(!is24Hour));
+    document.getElementById('toggleTimeFormat').addEventListener('click', () => setClockFormat(!is24Hour));
+    setClockFormat(is24Hour);
+
+    // Wallpaper Toggle
+    function setWallpaperState(show) {
+      showWallpaper = show;
+      localStorage.setItem('nyverune_show_wallpaper', showWallpaper);
+      wallpaperLabel.textContent = showWallpaper ? 'Active' : 'Hidden';
+      bgLayer.style.opacity = showWallpaper ? '1' : '0';
+    }
+    document.getElementById('toggleWallpaper').addEventListener('click', () => setWallpaperState(!showWallpaper));
+    setWallpaperState(showWallpaper);
+
+    // --- Search & Engine Handler ---
+    const engines = {
+      duckduckgo: {
+        name: 'DuckDuckGo',
+        url: 'https://duckduckgo.com/?q=',
+        prefix: '!ddg'
+      },
+      rust: {
+        name: 'Rust Docs',
+        url: 'https://docs.rs/releases/search?query=',
+        prefix: '!r'
+      },
+      crates: {
+        name: 'Crates.io',
+        url: 'https://crates.io/search?q=',
+        prefix: '!c'
+      },
+      github: {
+        name: 'GitHub',
+        url: 'https://github.com/search?q=',
+        prefix: '!gh'
+      },
+      archwiki: {
+        name: 'ArchWiki',
+        url: 'https://wiki.archlinux.org/index.php?search=',
+        prefix: '!w'
+      },
+      google: {
+        name: 'Google',
+        url: 'https://www.google.com/search?q=',
+        prefix: '!g'
+      }
+    };
+
+    let activeEngine = 'duckduckgo';
+    const pills = document.querySelectorAll('.pill');
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = document.getElementById('searchForm');
+
+    function selectEngine(engineKey) {
+      if (!engines[engineKey]) return;
+      activeEngine = engineKey;
+      pills.forEach(p => {
+        if (p.getAttribute('data-engine') === engineKey) {
+          p.classList.add('active');
+        } else {
+          p.classList.remove('active');
+        }
+      });
+      searchInput.placeholder = `Search ${engines[engineKey].name} or type !r, !c, !gh... (/ to focus)`;
+    }
+
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        selectEngine(pill.getAttribute('data-engine'));
+        searchInput.focus();
+      });
+    });
+
+    // Keyboard Shortcuts (/ to focus, Esc to blur)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      } else if (e.key === 'Escape' && document.activeElement === searchInput) {
+        searchInput.blur();
+      }
+    });
+
+    // Search submission
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let query = searchInput.value.trim();
+      if (!query) return;
+
+      // Check if user specified a prefix like "!r tokio", "!gh hyprland"
+      let targetEngine = activeEngine;
+      for (const [key, engine] of Object.entries(engines)) {
+        if (query.startsWith(engine.prefix + ' ')) {
+          targetEngine = key;
+          query = query.slice(engine.prefix.length + 1).trim();
+          break;
+        }
+      }
+
+      // If user typed a direct URL or localhost
+      if (/^(https?:\/\/|localhost(:[0-9]+)?|\w+\.\w{2,})/i.test(query)) {
+        let dest = query;
+        if (!/^https?:\/\//i.test(dest)) {
+          dest = 'https://' + dest;
+        }
+        window.location.href = dest;
+        return;
+      }
+
+      const searchUrl = engines[targetEngine].url + encodeURIComponent(query);
+      window.location.href = searchUrl;
+    });
+  </script>
+</body>
+</html>

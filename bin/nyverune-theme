@@ -547,6 +547,16 @@ def apply_theme(mode: str = None, image_path: str = None, force_nyverune: bool =
     export_rofi_colors(target_mode, colors_data)
     export_mako_colors(target_mode, colors_data)
     sync_assets_and_greeter(target_image, colors_data)
+
+    # Sync startpage colors.css
+    try:
+        startpage_css = DOTFILES_DIR / "startpage" / "colors.css"
+        wal_css = CACHE_DIR / "colors.css"
+        if wal_css.is_file():
+            startpage_css.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(wal_css, startpage_css)
+    except Exception:
+        pass
     reload_kitty()
     reload_nvim()
     reload_quickshell()

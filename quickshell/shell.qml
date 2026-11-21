@@ -98,6 +98,13 @@ ShellRoot {
     }
 
     // -------------------------------------------------------------
+    // Desktop Full-Width Audio Visualizer (Background layer behind all widgets)
+    // -------------------------------------------------------------
+    DesktopVisualizer {
+        id: desktopVisualizerWidget
+    }
+
+    // -------------------------------------------------------------
     // Desktop Background Widgets (OS Stats, Usable Calendar, Media & Memory Hub)
     // -------------------------------------------------------------
     DesktopStats {

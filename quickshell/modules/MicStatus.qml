@@ -17,7 +17,10 @@ Pill {
 
     Process {
         id: micChecker
-        command: ["sh", "-c", "pactl list source-outputs 2>/dev/null | grep -q 'Source Output' && echo 'IN_USE' || echo 'IDLE'"]
+        command: [
+            "sh", "-c",
+            "pactl list source-outputs 2>/dev/null | awk '/Source Output/ { in_block=1; is_cava=0; is_monitor=0 } /application.name = \"cava\"/ || /application.process.binary = \"cava\"/ { is_cava=1 } /stream.capture.sink = \"true\"/ { is_monitor=1 } /^$/ { if (in_block && !is_cava && !is_monitor) real++; in_block=0 } END { if (in_block && !is_cava && !is_monitor) real++; print (real > 0 ? \"IN_USE\" : \"IDLE\") }'"
+        ]
         stdout: StdioCollector {
             onTextChanged: {
                 let status = text.trim()

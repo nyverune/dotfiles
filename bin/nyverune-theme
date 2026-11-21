@@ -372,15 +372,41 @@ def sync_assets_and_greeter(target_image, colors_data):
     except Exception:
         pass
 
-    # 2. Update dms greeter wallpaper & colors
+    # 2. Update dms greeter wallpaper, settings, session & colors
     dms_dir = Path.home() / ".config" / "dms"
     dms_cache_dir = Path.home() / ".cache" / "dms"
+    dms_state_dir = Path.home() / ".local" / "state" / "dms"
     try:
         dms_dir.mkdir(parents=True, exist_ok=True)
         dms_cache_dir.mkdir(parents=True, exist_ok=True)
+        dms_state_dir.mkdir(parents=True, exist_ok=True)
         dms_wall = dms_dir / "wallpaper.jpg"
         shutil.copy2(img_path, dms_wall)
         os.chmod(dms_wall, 0o644)
+
+        # Ensure settings.json with 24h clock format
+        dms_settings = {
+            "currentThemeName": "purple",
+            "fontFamily": "JetBrainsMono Nerd Font",
+            "monoFontFamily": "JetBrainsMono Nerd Font",
+            "lockScreenShowProfileImage": True,
+            "lockScreenWallpaperPath": str(dms_wall),
+            "wallpaperFillMode": "Fill",
+            "lockScreenShowPowerActions": True,
+            "clockFormat": "24h"
+        }
+        with open(dms_dir / "settings.json", "w") as f:
+            json.dump(dms_settings, f, indent=2)
+        os.chmod(dms_dir / "settings.json", 0o644)
+
+        # Ensure session.json
+        dms_session = {
+            "isLightMode": False,
+            "wallpaperPath": str(dms_wall)
+        }
+        with open(dms_state_dir / "session.json", "w") as f:
+            json.dump(dms_session, f, indent=2)
+        os.chmod(dms_state_dir / "session.json", 0o644)
     except Exception:
         pass
 
@@ -410,6 +436,53 @@ def sync_assets_and_greeter(target_image, colors_data):
         with open(dms_cache_dir / "dms-colors.json", "w") as f:
             json.dump(dms_colors, f, indent=2)
         os.chmod(dms_cache_dir / "dms-colors.json", 0o644)
+    except Exception:
+        pass
+
+    # Sync per-user greeter slot with live DMS state
+    try:
+        greeter_wall = Path("/var/cache/dms-greeter/users/nyverune/wallpaper.jpg")
+        shell_wall = Path("/etc/dms/greeter-shell/wallpaper.jpg")
+        
+        def safe_sync_wall(dest: Path):
+            if not dest.parent.is_dir():
+                return
+            # Convert to baseline YUV420P JPEG to prevent hardware decoding black screens on Intel/AMD GPUs
+            res = subprocess.run([
+                "ffmpeg", "-y", "-i", str(img_path),
+                "-pix_fmt", "yuv420p",
+                str(dest)
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if res.returncode != 0:
+                shutil.copy2(img_path, dest)
+            os.chmod(dest, 0o644)
+
+        safe_sync_wall(greeter_wall)
+        safe_sync_wall(shell_wall)
+        subprocess.run(["dms-greeter", "sync", "--profile"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        # Sync hyprpaper config and reload wallpaper
+        try:
+            hyprpaper_conf = Path.home() / ".config" / "hypr" / "hyprpaper.conf"
+            hyprpaper_conf.parent.mkdir(parents=True, exist_ok=True)
+            hyprpaper_conf.write_text(f"""splash = false
+
+wallpaper {{
+    monitor = 
+    path = {img_path}
+    fit_mode = cover
+}}
+""")
+            # Also keep wallpaper picker cache in sync
+            wp_cache = Path.home() / ".cache" / "wallpaper_picker" / "last_wallpaper"
+            wp_cache.parent.mkdir(parents=True, exist_ok=True)
+            wp_cache.write_text(f"image|{img_path}\n")
+
+            if shutil.which("pkill") and shutil.which("hyprpaper"):
+                subprocess.run(["pkill", "-x", "hyprpaper"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.Popen(["hyprpaper"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception:
+            pass
     except Exception:
         pass
 

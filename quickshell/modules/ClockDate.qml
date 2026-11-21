@@ -23,7 +23,8 @@ Pill {
         let d5 = new Date(nowMs - (5 * 3600000))
         let h5 = String(d5.getUTCHours()).padStart(2, '0')
         let m5 = String(d5.getUTCMinutes()).padStart(2, '0')
-        root.utc5Time = h5 + ":" + m5
+        let s5 = String(d5.getUTCSeconds()).padStart(2, '0')
+        root.utc5Time = h5 + ":" + m5 + ":" + s5
 
         let dayName5 = days[d5.getUTCDay()]
         let monthName5 = months[d5.getUTCMonth()]
@@ -34,7 +35,8 @@ Pill {
         let dUtc = new Date(nowMs)
         let hUtc = String(dUtc.getUTCHours()).padStart(2, '0')
         let mUtc = String(dUtc.getUTCMinutes()).padStart(2, '0')
-        root.utcTime = hUtc + ":" + mUtc + " UTC"
+        let sUtc = String(dUtc.getUTCSeconds()).padStart(2, '0')
+        root.utcTime = hUtc + ":" + mUtc + ":" + sUtc + " UTC"
 
         let dayNameUtc = days[dUtc.getUTCDay()]
         let monthNameUtc = months[dUtc.getUTCMonth()]

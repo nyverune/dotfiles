@@ -1,0 +1,61 @@
+/* 
+ * Nyverune Pywal Theme for Zen Browser
+ * Seamless glassmorphism and dynamic color integration
+ */
+
+@import url("colors.css");
+
+:root {
+    --zen-primary-color: var(--color5, #90252B) !important;
+    --zen-colors-primary: var(--color5, #90252B) !important;
+    --zen-colors-secondary: var(--color0, #0F0512) !important;
+    --zen-colors-tertiary: var(--color1, #6C1B29) !important;
+    --zen-colors-border: rgba(207, 184, 182, 0.15) !important;
+    --zen-main-browser-background: var(--background, #0F0512) !important;
+    --toolbar-bgcolor: rgba(15, 5, 18, 0.82) !important;
+    --tab-selected-bgcolor: var(--color5, #90252B) !important;
+    --tab-selected-textcolor: #FFFFFF !important;
+    --zen-urlbar-background: rgba(25, 15, 28, 0.75) !important;
+    --arrowpanel-background: var(--background, #0F0512) !important;
+    --arrowpanel-border-color: var(--zen-colors-border) !important;
+}
+
+/* Glassmorphism sidebar & tabs toolbar */
+#navigator-toolbox,
+#TabsToolbar,
+#sidebar-box,
+#zen-sidebar-web-panel {
+    background-color: var(--background, #0F0512) !important;
+    backdrop-filter: blur(16px) !important;
+}
+
+/* Themed URL bar */
+#urlbar-background {
+    background-color: var(--zen-urlbar-background) !important;
+    border: 1px solid var(--zen-colors-border) !important;
+    border-radius: 12px !important;
+    transition: all 0.2s ease !important;
+}
+
+#urlbar[focused="true"] #urlbar-background {
+    border-color: var(--zen-primary-color) !important;
+    box-shadow: 0 0 15px rgba(144, 37, 43, 0.38) !important;
+}
+
+/* Selected tab pill */
+.tabbrowser-tab[selected="true"] .tab-background {
+    background: var(--color5, #90252B) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 10px rgba(144, 37, 43, 0.3) !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-label {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
+/* Tab hover effect */
+.tabbrowser-tab:hover:not([selected="true"]) .tab-background {
+    background-color: rgba(207, 184, 182, 0.08) !important;
+    border-radius: 10px !important;
+}

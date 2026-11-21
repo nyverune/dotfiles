@@ -311,7 +311,58 @@ def export_mako_colors(mode: str, colors: dict):
         f.write("\n".join(mako_lines) + "\n")
 
 # ------------------------------------------------------------------------------
-# 7. Live App Reload Helpers (Kitty, Quickshell, Mako, Greeter, Assets)
+# 7. Export Spicetify (Spotify) Colors from Pywal Cache
+# ------------------------------------------------------------------------------
+def export_spicetify_colors(mode: str, colors: dict):
+    spicetify_bin = shutil.which("spicetify")
+    if not spicetify_bin:
+        return
+
+    theme_dir = Path.home() / ".config" / "spicetify" / "Themes" / "Nyverune"
+    theme_dir.mkdir(parents=True, exist_ok=True)
+
+    special = colors.get("special", {})
+    palette = colors.get("colors", {})
+
+    def clean(h):
+        return h.replace("#", "")
+
+    bg = clean(special.get("background", "0b0d1b"))
+    fg = clean(special.get("foreground", "a4c2d9"))
+    c0 = clean(palette.get("color0", "0b0d1b"))
+    c1 = clean(palette.get("color1", "83457C"))
+    c2 = clean(palette.get("color2", "613B8A"))
+    c3 = clean(palette.get("color3", "395791"))
+    c4 = clean(palette.get("color4", "595A9D"))
+    c5 = clean(palette.get("color5", "9A5B9F"))
+    c6 = clean(palette.get("color6", "9B51A9"))
+    c8 = clean(palette.get("color8", "728797"))
+
+    color_ini = f"""[Pywal]
+text               = {fg}
+subtext            = {c8}
+main               = {bg}
+main-elevated      = {c0}
+highlight          = {c8}
+highlight-elevated = {c4}
+sidebar            = {bg}
+player             = {bg}
+card               = {c0}
+shadow             = {bg}
+selected-row       = {c8}
+button             = {c5}
+button-active      = {c6}
+button-disabled    = {c8}
+tab-active         = {c5}
+notification       = {c5}
+notification-error = {c1}
+misc               = {c8}
+"""
+    with open(theme_dir / "color.ini", "w") as f:
+        f.write(color_ini)
+
+# ------------------------------------------------------------------------------
+# 8. Live App Reload Helpers (Kitty, Quickshell, Mako, Spotify, Greeter, Assets)
 # ------------------------------------------------------------------------------
 def get_user_env():
     env = dict(os.environ)
@@ -354,6 +405,27 @@ def reload_mako():
             subprocess.run(["makoctl", "reload"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:
             subprocess.Popen(["mako"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    except Exception:
+        pass
+
+def reload_spotify():
+    spicetify_bin = shutil.which("spicetify")
+    if not spicetify_bin:
+        return
+
+    # Use 'spicetify refresh' asynchronously in the background so nyverune-theme returns instantly.
+    # 'refresh' updates only theme CSS/colors in <0.8s (unlike 'apply' which repacks the whole app in 15s).
+    cmd = (
+        f"{spicetify_bin} refresh >/dev/null 2>&1 && "
+        "if pgrep -x spotify >/dev/null; then "
+        "  hyprctl dispatch 'hl.dsp.send_shortcut({ mods = \"CTRL_SHIFT\", key = \"R\", window = \"class:spotify\" })' >/dev/null 2>&1; "
+        "  hyprctl dispatch 'hl.dsp.send_shortcut({ mods = \"CTRL_SHIFT\", key = \"R\", window = \"class:Spotify\" })' >/dev/null 2>&1; "
+        "  hyprctl dispatch 'hl.dsp.send_shortcut({ mods = \"CTRL\", key = \"R\", window = \"class:spotify\" })' >/dev/null 2>&1; "
+        "  hyprctl dispatch 'hl.dsp.send_shortcut({ mods = \"CTRL\", key = \"R\", window = \"class:Spotify\" })' >/dev/null 2>&1; "
+        "fi"
+    )
+    try:
+        subprocess.Popen(["sh", "-c", cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     except Exception:
         pass
 
@@ -540,12 +612,13 @@ def apply_theme(mode: str = None, image_path: str = None, force_nyverune: bool =
         except Exception:
             pass
 
-    # Apply to GTK, Zsh, Hyprland, Rofi, Mako, Kitty, Quickshell, Hyprlock and DMS Greeter
+    # Apply to GTK, Zsh, Hyprland, Rofi, Mako, Kitty, Quickshell, Hyprlock, Spotify and DMS Greeter
     apply_gtk_theme(target_mode, colors_data)
     export_zsh_colors(target_mode, colors_data)
     export_hypr_colors(target_mode, colors_data, target_image)
     export_rofi_colors(target_mode, colors_data)
     export_mako_colors(target_mode, colors_data)
+    export_spicetify_colors(target_mode, colors_data)
     sync_assets_and_greeter(target_image, colors_data)
 
     # Sync startpage colors.css
@@ -561,6 +634,7 @@ def apply_theme(mode: str = None, image_path: str = None, force_nyverune: bool =
     reload_nvim()
     reload_quickshell()
     reload_mako()
+    reload_spotify()
 
     # Reload Hyprland if running
     try:

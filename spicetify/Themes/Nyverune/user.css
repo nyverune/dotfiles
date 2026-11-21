@@ -1,0 +1,85 @@
+/* Nyverune Dynamic Pywal Theme for Spotify */
+:root {
+  --border-radius: 12px;
+}
+
+/* Rounded covers and cards */
+.main-card-imageContainer img,
+.main-cardImage-image,
+.main-entityHeader-image,
+.main-image-image {
+  border-radius: var(--border-radius) !important;
+}
+
+.main-card-card {
+  border-radius: 14px !important;
+  background-color: var(--spice-card) !important;
+  transition: transform 0.2s ease, background-color 0.2s ease !important;
+}
+
+.main-card-card:hover {
+  background-color: var(--spice-highlight) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Player Bar at bottom */
+.main-nowPlayingBar-container {
+  background-color: var(--spice-player) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Play/Pause Button */
+.main-playButton-PlayButton,
+.main-playPauseButton-button {
+  background-color: var(--spice-button) !important;
+  color: var(--spice-main) !important;
+  transition: transform 0.15s ease, background-color 0.15s ease !important;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.main-playButton-PlayButton:hover,
+.main-playPauseButton-button:hover {
+  background-color: var(--spice-button-active) !important;
+  transform: scale(1.06) !important;
+}
+
+/* Progress bar slider */
+.x-progressBar-fillColor {
+  background-color: var(--spice-button) !important;
+  border-radius: 4px !important;
+}
+
+.x-progressBar-progressBarBg {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-radius: 4px !important;
+}
+
+/* Sidebar navigation */
+.main-yourLibraryX-entryPoints {
+  background-color: var(--spice-sidebar) !important;
+  border-radius: 14px !important;
+}
+
+.main-rootlist-rootlistDivider {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Active navigation item pill */
+.main-navBar-navBarLinkActive {
+  background-color: var(--spice-highlight) !important;
+  border-radius: 10px !important;
+  color: var(--spice-text) !important;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--spice-highlight) !important;
+  border-radius: 4px !important;
+}
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}

@@ -28,6 +28,12 @@ hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpapers.sh
 -- Clipboard history picker (Rofi + Cliphist)
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("~/.config/hypr/scripts/clipboard.sh"))
 
+-- Network / Wi-Fi Manager (Rofi + nmcli)
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("~/.config/hypr/scripts/rofi-wifi.sh"))
+
+-- Bluetooth Manager (Rofi + bluetoothctl)
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("~/.config/hypr/scripts/rofi-bluetooth.sh"))
+
 -- Window management
 hl.bind(mainMod .. " + K", hl.dsp.window.close())
 hl.bind(mainMod .. " + T", hl.dsp.window.float({ action = "toggle" }))

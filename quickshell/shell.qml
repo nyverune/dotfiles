@@ -98,6 +98,25 @@ ShellRoot {
     }
 
     // -------------------------------------------------------------
+    // Desktop Background Widgets (OS Stats, Usable Calendar, Media & Memory Hub)
+    // -------------------------------------------------------------
+    DesktopStats {
+        id: desktopStatsWidget
+    }
+
+    DesktopCalendar {
+        id: desktopCalendarWidget
+    }
+
+    DesktopMedia {
+        id: desktopMediaWidget
+    }
+
+    DesktopMemory {
+        id: desktopMemoryWidget
+    }
+
+    // -------------------------------------------------------------
     // IPC Handler for Live Dynamic Theme Reload
     // -------------------------------------------------------------
     IpcHandler {

@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Hyprpaper launcher that always restores the last wallpaper
+
+set -euo pipefail
+
+WALLPAPER=""
+
+# 1. Check wallpaper picker cache
+if [[ -f "$HOME/.cache/wallpaper_picker/last_wallpaper" ]]; then
+    stored="$(cut -d'|' -f2- "$HOME/.cache/wallpaper_picker/last_wallpaper" 2>/dev/null || true)"
+    if [[ -n "$stored" && -f "$stored" ]]; then
+        WALLPAPER="$stored"
+    fi
+fi
+
+# 2. Check pywal cache
+if [[ -z "$WALLPAPER" && -f "$HOME/.cache/wal/wal" ]]; then
+    stored="$(cat "$HOME/.cache/wal/wal" 2>/dev/null || true)"
+    if [[ -n "$stored" && -f "$stored" ]]; then
+        WALLPAPER="$stored"
+    fi
+fi
+
+# 3. Check nyverune theme state
+if [[ -z "$WALLPAPER" && -f "$HOME/.cache/nyverune/state.json" ]]; then
+    stored="$(python3 -c "import json; print(json.load(open('$HOME/.cache/nyverune/state.json')).get('image', ''))" 2>/dev/null || true)"
+    if [[ -n "$stored" && -f "$stored" ]]; then
+        WALLPAPER="$stored"
+    fi
+fi
+
+# 4. Fallback default
+if [[ -z "$WALLPAPER" || ! -f "$WALLPAPER" ]]; then
+    WALLPAPER="$HOME/Pictures/Wallpapers/dark-anime-10.jpg"
+fi
+
+CONF_FILE="$HOME/.config/hypr/hyprpaper.conf"
+mkdir -p "$(dirname "$CONF_FILE")"
+
+cat << EOF > "$CONF_FILE"
+splash = false
+
+wallpaper {
+    monitor = 
+    path = $WALLPAPER
+    fit_mode = cover
+}
+EOF
+
+# Kill any existing instance and start hyprpaper fresh
+pkill -x hyprpaper 2>/dev/null || true
+sleep 0.2
+exec hyprpaper

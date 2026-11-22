@@ -1,0 +1,24 @@
+# ==============================================================================
+# Nyverune Dotfiles - Optional & Additional Packages
+#
+# Format:
+#   package[:binary_command] [# Description]
+#
+# The setup script will suggest installing any missing packages listed here.
+# ==============================================================================
+
+# AUR Package Helper
+yay:yay                             # Modern AUR helper for compiling and installing community packages
+
+# Multimedia & Productivity Apps
+spotify:spotify                     # Official Spotify desktop music and podcast client
+gopass:gopass                       # Modern, secure console password manager
+spicetify-cli:spicetify             # Customizer and theming engine for Spotify desktop client
+zen-browser-bin:zen-browser         # Modern privacy-focused Zen Browser (supports userChrome.css)
+
+# Shell & Advanced Desktop Environment
+quickshell:quickshell               # Reactive QML desktop widgets, status bar and OSD
+btop:btop                           # Interactive system resource monitor
+eza:eza                             # Modern, colorful ls replacement with icon support
+bat:bat                             # Cat clone with syntax highlighting and git integration
+tty-clock:tty-clock                 # Digital terminal clock

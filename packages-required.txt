@@ -1,0 +1,51 @@
+# ==============================================================================
+# Nyverune Dotfiles - Required Packages
+#
+# Format:
+#   package[:binary_command] [# Description]
+#
+# If ':binary_command' is omitted, the package name is assumed.
+# The script checks if the package is installed via pacman/yay or available in PATH.
+# ==============================================================================
+
+# Core & Dotfiles Management
+stow:stow                           # Symlink farm manager for dotfiles
+git:git                             # Version control system
+
+# Wayland Desktop Environment & Compositor
+hyprland:Hyprland                   # Dynamic tiling Wayland compositor
+hyprpaper:hyprpaper                 # Wayland wallpaper daemon
+hyprlock:hyprlock                   # Fast and secure Wayland screen locker
+hyprshot:hyprshot                   # CLI screenshot utility for Hyprland
+
+# Terminal & Shell
+kitty:kitty                         # GPU-accelerated terminal emulator
+zsh:zsh                             # Modular Zsh shell configured in dotfiles
+fzf:fzf                             # Interactive fuzzy finder for shell and terminal
+fastfetch:fastfetch                 # Fast and modern system information visualizer
+
+# Editor & Application Menus
+neovim:nvim                         # Extensible terminal text editor ($EDITOR)
+rofi-wayland:rofi                   # Application launcher and interactive menus
+
+# Notifications & Audio
+mako:mako                           # Lightweight notification daemon for Wayland
+cava:cava                           # Console audio visualizer
+wireplumber:wpctl                   # PipeWire audio server and volume control
+playerctl:playerctl                 # CLI media player controller (Spotify/MPRIS)
+
+# Clipboard & Theming
+wl-clipboard:wl-copy                # Wayland clipboard utilities (wl-copy and wl-paste)
+cliphist:cliphist                   # Clipboard history manager with Rofi integration
+python-pywal:wal                    # Wallpaper-based colorscheme and palette generator
+
+# System, Network & Hardware
+brightnessctl:brightnessctl         # Display brightness controller for laptops
+networkmanager:nmcli                # Wi-Fi and Ethernet network management
+bluez-utils:bluetoothctl            # Bluetooth device control utilities
+dolphin:dolphin                     # Default graphical file manager
+polkit-kde-agent                    # Graphical Polkit authentication agent
+gnome-keyring:gnome-keyring-daemon  # Secure password and SSH/GPG keyring daemon
+
+# Typography & Fonts
+ttf-jetbrains-mono-nerd             # JetBrains Mono Nerd Font with symbols for bar & terminal
